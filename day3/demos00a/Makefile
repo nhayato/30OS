@@ -1,46 +1,31 @@
-TOOLPATH = ../z_tools/
-MAKE     = $(TOOLPATH)make.exe -r
-NASK     = $(TOOLPATH)nask.exe
-EDIMG    = $(TOOLPATH)edimg.exe
-IMGTOL   = $(TOOLPATH)imgtol.com
-COPY     = copy
-DEL      = del
+MAKE	= make -r
 
 # デフォルト動作
 
 default :
-	$(MAKE) img
+	make img
 
 # ファイル生成規則
 
-ipl.bin : ipl.nas Makefile
-	$(NASK) ipl.nas ipl.bin ipl.lst
-
-haribote.img : ipl.bin Makefile
-	$(EDIMG)   imgin:../z_tools/fdimg0at.tek \
-		wbinimg src:ipl.bin len:512 from:0 to:0   imgout:haribote.img
+ipl.bin: ipl.asm Makefile
+	nasm ipl.asm -o ipl.bin -l ipl.lst
+tail.bin: tail.asm Makefile
+	nasm tail.asm -o tail.bin -l tail.lst
+demos.img: ipl.bin tail.bin Makefile
+	cat ipl.bin tail.bin > demos.img
 
 # コマンド
 
-asm :
+asm:
 	$(MAKE) ipl.bin
-
-img :
-	$(MAKE) haribote.img
-
-run :
+img:
+	$(MAKE) demos.img
+run:
 	$(MAKE) img
-	$(COPY) haribote.img ..\z_tools\qemu\fdimage0.bin
-	$(MAKE) -C ../z_tools/qemu
-
-install :
-	$(MAKE) img
-	$(IMGTOL) w a: haribote.img
-
-clean :
-	-$(DEL) ipl.bin
-	-$(DEL) ipl.lst
-
-src_only :
-	$(MAKE) clean
-	-$(DEL) haribote.img
+	qemu-system-i386 demos.img
+clean:
+	$(RM) *.bin
+	$(RM) *.lst
+src_only:
+	make clean
+	$(RM) *.img
