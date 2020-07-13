@@ -22,7 +22,7 @@ image_file: ipl.bin demos.sys Makefile
 asm:
 	$(MAKE) ipl.bin
 img:
-	$(MAKE) ${image_file}
+	$(MAKE) image_file
 run:
 	$(MAKE) img
 	qemu-system-i386 -drive file=${image_file},format=raw,if=floppy
