@@ -22,7 +22,7 @@ img:
 	$(MAKE) demos.img
 run:
 	$(MAKE) img
-	qemu-system-i386 demos.img
+	qemu-system-i386 -fda demos.img
 clean:
 	$(RM) *.bin
 	$(RM) *.lst
