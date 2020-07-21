@@ -30,13 +30,13 @@ io_in8:
     IN      AL,DX
     RET
 
-io_in16
+io_in16:
     MOV     EDX,[ESP+4]
     MOV     EAX,0
     IN      AX,DX
     RET
 
-io_in32
+io_in32:
     MOV     EDX,[ESP+4]
     IN      EAX,DX
     RET
