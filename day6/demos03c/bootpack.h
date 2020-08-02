@@ -1,14 +1,14 @@
 // asmhead.asm
 struct BOOTINFO // 0x0ff0-0x0fff
 {
-    char syls; // ブートセクタはどこまでディスクを読んだのか
+    char cyls; // ブートセクタはどこまでディスクを読んだのか
     char leds; // ブート時のキーボードのLEDの状態
     char vmode; // ビデオモード（何ビットカラーか）
     char reserve;
     short scrnx, scrny; // 画面解像度
     char *vram;
 };
-#define ADR_BOOTINFO
+#define ADR_BOOTINFO    0x00000ff0
 
 // naskfunc.nas
 void io_hlt(void);
