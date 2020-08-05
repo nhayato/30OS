@@ -32,8 +32,6 @@ void boxfill8(unsigned char *vram, int xsize, unsigned char c, int x0, int y0, i
 void putblock8_8(char *vram, int vxsize, int pxsize,
     int pysize, int px0, int py0, char *buf, int bxsize);
 
-void init_gdtidt(void);
-
 #define COL8_000000 0
 #define COL8_FF0000 1
 #define COL8_00FF00 2
@@ -68,3 +66,11 @@ struct GATE_DESCRIPTOR{
 void init_gdtidt(void);
 void set_segment(struct SEGMENT_DESCRIPTOR *sd, unsigned int limit, int base, int ar);
 void set_gatedesc(struct GATE_DESCRIPTOR *gd, int offset, int selector, int ar);
+#define ADR_IDT         0x0026f800
+#define LIMIT_IDT       0x000007ff
+#define ADR_GDT         0x00270000
+#define LIMIT_GDT       0x0000ffff
+#define ADR_BOTPAK      0x00280000
+#define LIMIT_BOTPAK    0x0007ffff
+#define AR_DATA32_RW    0x4092
+#define AR_CODE32_ER    0x409a

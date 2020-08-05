@@ -64,6 +64,7 @@ void HariMain(void)
 	char s[40], mcursor[256];
     int mx, my;
 
+    init_gdtidt();
     init_palette();
     init_screen(binfo->vram, binfo->scrnx, binfo->scrny);
     mx = (binfo->scrnx - 16) / 2; /* 画面中央になるように座標計算 */
