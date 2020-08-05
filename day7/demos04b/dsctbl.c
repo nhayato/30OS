@@ -2,24 +2,24 @@
 
 void init_gdtidt(void)
 {
-    struct SEGMENT_DESCRIPTOR *gdt = (struct SEGMENT_DESCRIPTOR *) 0x00270000;
-    struct GATE_DESCRIPTOR    *idt = (struct GATE_DESCRIPTOR    *) 0x0026f800;
+    struct SEGMENT_DESCRIPTOR *gdt = (struct SEGMENT_DESCRIPTOR *) ADR_GDT;
+    struct GATE_DESCRIPTOR    *idt = (struct GATE_DESCRIPTOR    *) ADR_IDT;
     int i;
 
     /*GDTの初期化*/
     // 8192個のGDTすべてのセグメントに対して，リミット0，ベース0，アクセス権属性0を付与
-    for(i = 0; i < 8192; i++){
+    for(i = 0; i <= LIMIT_GDT / 8; i++){
         set_segment(gdt + i, 0, 0, 0); //ポインタへの足し算は，実際は掛け算
     }
-    set_segment(gdt + 1, 0xffffffff, 0x00000000, 0x4092); // セグメント番号1番に対する設定
-    set_segment(gdt + 2, 0x0007ffff, 0x00280000, 0x409a); // セグメント番号2番に対する設定（bootpack.hrb用）
-    load_gdtr(0xffff, 0x00270000);
+    set_segment(gdt + 1, 0xffffffff, 0x00000000, AR_DATA32_RW); // セグメント番号1番に対する設定
+    set_segment(gdt + 2, 0x0007ffff, 0x00280000, AR_CODE32_ER); // セグメント番号2番に対する設定（bootpack.hrb用）
+    load_gdtr(LIMIT_GDT, ADR_GDT);
 
     /* IDTの初期化 */
-    for (i = 0; i <256; i++){
-        set_gatedesc(idt+i, 0,0,0);
+    for (i = 0; i <= LIMIT_IDT / 8; i++){
+        set_gatedesc(idt + i, 0,0,0);
     }
-    load_idtr(0x7ff, 0x0026f800);
+    load_idtr(LIMIT_IDT, ADR_IDT);
 
     // IDTの設定
     set_gatedesc(idt + 0x21, (int) asm_inthandler21, 2 * 8, AR_INTGATE32);
