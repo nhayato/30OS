@@ -116,8 +116,9 @@ skip:
 		JMP		DWORD 2*8:0x0000001b
 
 waitkbdout:
-		IN		 AL,0x64
-		AND		 AL,0x02
+		IN		AL,0x64
+		AND		AL,0x02
+		IN		AL,0x06			; から読み（受信バッファが悪さをしないように）
 		JNZ		waitkbdout		; ANDの結果が0でなければwaitkbdoutへ
 		RET
 
