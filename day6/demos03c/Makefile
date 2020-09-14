@@ -19,22 +19,30 @@ convHankakuTxt: convHankakuTxt.c
 hankaku.c: hankaku.txt convHankakuTxt
 	./convHankakuTxt
 
-%.bin: %.bin Makefile
+%.bin: %.asm Makefile
 	nasm $*.asm -o $*.bin -l $*.lst
 
-nasmfunc.o: nasmfunc.asm Makefile						# nasmfunc.asmのバイナリファイル
-	nasm -g -f elf nasmfunc.asm -o nasmfunc.o
+# nasmfunc.asmのバイナリファイル
+nasmfunc.o: nasmfunc.asm Makefile
+	nasm -g -f elf -o nasmfunc.o nasmfunc.asm
 
-bootpack.hrb: bootpack.h graphic.c dsctbl.c bootpack.c har.ld hankaku.c nasmfunc.o mysprintf.c Makefile # Cファイルをリンカスクリプトを用いてコンパイルする
-	gcc -march=i486 -m32 -nostdlib -fno-pic -T har.ld -g bootpack.h graphic.c dsctbl.c bootpack.c hankaku.c nasmfunc.o mysprintf.c -o bootpack.hrb
+# Cファイルをリンカスクリプトを用いてコンパイルする
+bootpack.bin: bootpack.o hankaku.o nasmfunc.o mysprintf.o dsctbl.o graphic.o Makefile
+	ld -m elf_i386 -e HariMain -o bootpack.bin -T har.ld bootpack.o graphic.o dsctbl.o hankaku.o nasmfunc.o mysprintf.o
 
-${OSNAME}.sys: asmhead.bin bootpack.hrb Makefile
-	cat asmhead.bin bootpack.hrb > ${OSNAME}.sys
+${OSNAME}.sys: asmhead.bin bootpack.bin Makefile
+	cat asmhead.bin bootpack.bin > ${OSNAME}.sys
 
 ${OSIMAGE}: ipl10.bin ${OSNAME}.sys Makefile
 	mformat -f 1440 -C -B ipl10.bin -i $@ ::
 	mcopy -i $@ ${OSNAME}.sys ::
 
+# bootpack.hが必要であるため下ブロックと別にした
+bootpack.o: bootpack.c bootpack.h
+	gcc -c -m32 -fno-pic -nostdlib -o bootpack.o bootpack.c
+
+%.o: %.c
+	gcc -c -m32 -fno-pic -nostdlib -o $*.o $*.c
 
 # コマンド
 .PHONY: asm

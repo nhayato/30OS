@@ -2,7 +2,7 @@ MAKE	= make -r
 OSNAME = demos
 OSBUILDER := ${OSNAME}-builder
 OSIMAGE=${OSNAME}.img
-
+CFLAGS=-fno-pie -march=i486 -m32 -nostdlib -fno-builtin
 # デフォルト動作
 
 .PHONY: default
@@ -19,21 +19,38 @@ convHankakuTxt: convHankakuTxt.c
 hankaku.c: hankaku.txt convHankakuTxt
 	./convHankakuTxt
 
-%.bin: %.bin Makefile
+hankaku.o: hankaku.c
+	gcc -c -m32 -fno-pic -nostdlib -o hankaku.o hankaku.c
+
+mysprintf.o: mysprintf.c
+	gcc -c -m32 -fno-pic -nostdlib -o mysprintf.o mysprintf.c
+
+
+%.bin: %.asm Makefile
 	nasm $*.asm -o $*.bin -l $*.lst
 
-nasmfunc.o: nasmfunc.asm Makefile						# nasmfunc.asmのバイナリファイル
-	nasm -g -f elf nasmfunc.asm -o nasmfunc.o
+nasmfunc.o: nasmfunc.asm Makefile				# nasmfunc.asmのバイナリファイル
+	nasm -g -f elf -o nasmfunc.o nasmfunc.asm
 
-bootpack.hrb: graphic.c dsctbl.c bootpack.c har.ld hankaku.c nasmfunc.o mysprintf.c Makefile # Cファイルをリンカスクリプトを用いてコンパイルする
-	gcc -march=i486 -m32 -nostdlib -fno-pic -T har.ld -g graphic.c dsctbl.c bootpack.c hankaku.c nasmfunc.o mysprintf.c -o bootpack.hrb
+bootpack.bin: bootpack.o hankaku.o nasmfunc.o mysprintf.o dsctbl.o graphic.o
+	ld -m elf_i386 -e HariMain -o bootpack.bin -T har.ld bootpack.o graphic.o dsctbl.o hankaku.o nasmfunc.o mysprintf.o
 
-${OSNAME}.sys: asmhead.bin bootpack.hrb Makefile
-	cat asmhead.bin bootpack.hrb > ${OSNAME}.sys
+${OSNAME}.sys: asmhead.bin bootpack.bin Makefile
+	cat asmhead.bin bootpack.bin > ${OSNAME}.sys
 
 ${OSIMAGE}: ipl10.bin ${OSNAME}.sys Makefile
 	mformat -f 1440 -C -B ipl10.bin -i $@ ::
 	mcopy -i $@ ${OSNAME}.sys ::
+
+graphic.o: graphic.c
+	gcc -c -m32 -fno-pic -nostdlib -o graphic.o graphic.c
+
+dsctbl.o: dsctbl.c
+	gcc -c -m32 -fno-pic -nostdlib -o dsctbl.o dsctbl.c
+
+bootpack.o: bootpack.c
+	gcc -c -m32 -fno-pic -nostdlib -o bootpack.o bootpack.c
+
 
 
 # コマンド
