@@ -152,6 +152,8 @@ unsigned int memman_total(struct MEMMAN *man)
 }
 
 // 確保
+// 成功した場合、確保した番地を返す
+// 失敗した場合、0を返す
 unsigned int memman_alloc(struct MEMMAN *man, unsigned int size)
 {
     unsigned int i, a;
@@ -191,7 +193,7 @@ int memman_free(struct MEMMAN *man, unsigned int addr, unsigned int size)
         if (man->free[i-1].addr + man->free[i-1].size == addr){
             // 前のあき領域にまとめられる
             man->free[i-1].size += size;
-            if(i <man->frees){
+            if(i < man->frees){
                 // 後ろもある
                 if (addr + size == man->free[i].addr){
                     // なんと後ろともまとめられる
@@ -199,7 +201,7 @@ int memman_free(struct MEMMAN *man, unsigned int addr, unsigned int size)
                     // man->free[i]の削除
                     // free[i]がなくなったので前へつめる
                     man->frees--;
-                    for(; i <man->frees; i++){
+                    for(; i < man->frees; i++){
                         man->free[i] = man->free[i + 1]; // 構造体の代入
                     }
                 }

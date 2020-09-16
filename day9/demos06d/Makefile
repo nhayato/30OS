@@ -87,4 +87,4 @@ docker-make:
 docker-run:
 	make docker-build
 	make docker-make
-	qemu-system-i386 -drive file=${OSIMAGE},format=raw,if=floppy
+	qemu-system-i386 -m 32m -drive file=${OSIMAGE},format=raw,if=floppy
