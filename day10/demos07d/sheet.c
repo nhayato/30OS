@@ -31,7 +31,7 @@ struct SHEET *sheet_alloc(struct SHTCTL *ctl)
         {
             sht = &ctl->sheets0[i];
             sht->flags = SHEET_USE; // 使用中マーク
-            sht->height = -1;       // 非使用中
+            sht->height = -1;       // 非表示
             return sht;
         }
     }
@@ -144,7 +144,7 @@ void sheet_refreshsub(struct SHTCTL *ctl, int vx0, int vy0, int vx1, int vy1)
     {
         sht = ctl->sheets[h];
         buf = sht->buf;
-        // vx0-vy1を使って、bx0-by1を逆算する
+        // vx0~vy1を使って、bx0~by1を逆算する
         bx0 = vx0 - sht->vx0;
         by0 = vy0 - sht->vy0;
         bx1 = vx1 - sht->vx0;

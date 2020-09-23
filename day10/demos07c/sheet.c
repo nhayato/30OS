@@ -31,7 +31,7 @@ struct SHEET *sheet_alloc(struct SHTCTL *ctl)
         {
             sht = &ctl->sheets0[i];
             sht->flags = SHEET_USE; // 使用中マーク
-            sht->height = -1;       // 非使用中
+            sht->height = -1;       // 非表示
             return sht;
         }
     }
@@ -97,7 +97,7 @@ void sheet_updown(struct SHTCTL *ctl, struct SHEET *sht, int height)
         sheet_refreshsub(ctl, sht->vx0, sht->vy0, sht->vx0 + sht->bxsize, sht->vy0 + sht->bysize); // 新しい下敷きの情報に沿って画面を書き直す
     }
     else if (old < height)
-    { //以前よりも高くなる
+    { // 以前よりも高くなる
         if (old >= 0)
         {
             // 間のものを押し下げる
@@ -135,9 +135,11 @@ void sheet_refresh(struct SHTCTL *ctl, struct SHEET *sht, int bx0, int by0, int 
 }
 
 // 範囲指定をして一部分だけ書き換える
+// vx0, vy0: 更新したい開始地点
+// vx1, vy1: 更新したい終了地点
 void sheet_refreshsub(struct SHTCTL *ctl, int vx0, int vy0, int vx1, int vy1)
 {
-    int h, bx, by, vx, vy;
+    int h, bx, by, vx, vy; // bx, by: for文におけるindex, vx, vy: VRAM上の座標を考慮したシート位置
     unsigned char *buf, c, *vram = ctl->vram;
     struct SHEET *sht;
     for (h = 0; h <= ctl->top; h++)
