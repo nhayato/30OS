@@ -200,5 +200,9 @@ void sheet_free(struct SHEET *sht);
 void make_window8(unsigned char *buf, int xsize, int ysize, char *title);
 
 // timer.c
+struct TIMERCTL {
+  unsigned int count;
+};
+extern struct TIMERCTL timerctl;
 void init_pit(void);
 void inthandler20(int *esp);
