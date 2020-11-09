@@ -6,7 +6,7 @@ void HariMain(void) {
   char s[40];
   int fifobuf[128];
   struct TIMER *timer, *timer2, *timer3;
-  int mx, my, i, count = 0;
+  int mx, my, i, cursor_x, cursor_c;
   struct MOUSE_DEC mdec;
   unsigned int memtotal;
   struct MEMMAN *memman = (struct MEMMAN *)MEMMAN_ADDR;
@@ -20,13 +20,7 @@ void HariMain(void) {
       0, '\\', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/', 0,    '*',
       0, ' ',  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,    0,
       0, '7',  '8', '9', '-', '4', '5', '6', '+', '1', '2', '3', '0',  '.'};
-  int cursor_x, cursor_c;
-  struct TSS32 tss_a, tss_b;
-  tss_a.ldtr = 0;
-  tss_a.iomap = 0x40000000;
-  tss_b.ldtr = 0;
-  tss_b.iomap = 0x40000000;
-  struct SEGMENT_DESCRIPTOR *gdt = (struct SEGMENT_DESCRIPTOR *)ADR_GDT;
+  struct TASK *task_b;
 
   init_gdtidt();
   init_pic();
@@ -37,31 +31,7 @@ void HariMain(void) {
   enable_mouse(&fifo, 512, &mdec);
   io_out8(PIC0_IMR, 0xf8); /* PITとPIC1とキーボードを許可(11111001) */
   io_out8(PIC1_IMR, 0xef); /* マウスを許可(11101111) */
-  int task_b_esp;
-  task_b_esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024 - 8;
 
-  set_segment(gdt + 3, 103, (int)&tss_a, AR_TSS32);
-  set_segment(gdt + 4, 103, (int)&tss_b, AR_TSS32);
-  load_tr(3 * 8);
-
-  tss_b.eip = (int)&task_b_main;
-  tss_b.eflags = 0x00000202;  // IF = 1;
-  tss_b.eax = 0;
-  tss_b.ecx = 0;
-  tss_b.edx = 0;
-  tss_b.ebx = 0;
-  tss_b.esp = task_b_esp;
-  tss_b.ebp = 0;
-  tss_b.esi = 0;
-  tss_b.edi = 0;
-  tss_b.es = 1 * 8;
-  tss_b.cs = 2 * 8;
-  tss_b.ss = 1 * 8;
-  tss_b.ds = 1 * 8;
-  tss_b.fs = 1 * 8;
-  tss_b.gs = 1 * 8;
-
-  set490(&fifo, 0);
   timer = timer_alloc();
   timer_init(timer, &fifo, 10);
   timer_settime(timer, 1000);
@@ -109,8 +79,18 @@ void HariMain(void) {
             memman_total(memman) / 1024);
   putfonts8_asc_sht(sht_back, 0, 32, COL8_FFFFFF, COL8_008484, s, 40);
 
-  *((int *)(task_b_esp + 4)) = (int)sht_back;
-  mt_init();
+  task_init(memman);
+  task_b = task_alloc();
+  task_b->tss.esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024 - 8;
+  task_b->tss.eip = (int)&task_b_main;
+  task_b->tss.es = 1 * 8;
+  task_b->tss.cs = 2 * 8;
+  task_b->tss.ss = 1 * 8;
+  task_b->tss.ds = 1 * 8;
+  task_b->tss.fs = 1 * 8;
+  task_b->tss.gs = 1 * 8;
+  *((int *)(task_b->tss.esp + 4)) = (int)sht_back;
+  task_run(task_b);
 
   for (;;) {
     io_cli();
@@ -259,19 +239,6 @@ void putfonts8_asc_sht(struct SHEET *sht, int x, int y, int c, int b, char *s,
   boxfill8(sht->buf, sht->bxsize, b, x, y, x + l * 8 - 1, y + 15);
   putfonts8_asc(sht->buf, sht->bxsize, x, y, c, s);
   sheet_refresh(sht, x, y, x + l * 8, y + 16);
-  return;
-}
-
-void set490(struct FIFO32 *fifo, int mode) {
-  int i;
-  struct TIMER *timer;
-  if (mode != 0) {
-    for (i = 0; i < 490; i++) {
-      timer = timer_alloc();
-      timer_init(timer, fifo, 1024 + i);
-      timer_settime(timer, 100 * 60 * 60 * 24 * 50 + i * 100);
-    }
-  }
   return;
 }
 
