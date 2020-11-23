@@ -127,7 +127,7 @@ void HariMain(void) {
   for (;;) {
     if (fifo32_status(&keycmd) > 0 && keycmd_wait < 0) {
       // キーボードコントローラーに送るデータがあればおくる
-      keycmd_wait = fifo32_get(&keycmd_wait);
+      keycmd_wait = fifo32_get(&keycmd);
       wait_KBC_sendready();
       io_out8(PORT_KEYDAT, keycmd_wait);
     }
