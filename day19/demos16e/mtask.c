@@ -11,7 +11,7 @@ struct TASK *task_init(struct MEMMAN *memman) {
     taskctl->tasks0[i].flags = 0;
     taskctl->tasks0[i].sel = (TASK_GDT0 + i) * 8;
     set_segmdesc(gdt + TASK_GDT0 + i, 103, (int)&taskctl->tasks0[i].tss,
-                 AR_TSS32);
+                AR_TSS32);
   }
   for (i = 0; i < MAX_TASKLEVELS; i++) {
     taskctl->level[i].running = 0;

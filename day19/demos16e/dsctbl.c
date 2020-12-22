@@ -11,9 +11,10 @@ void init_gdtidt(void) {
     set_segmdesc(gdt + i, 0, 0, 0);  //ポインタへの足し算は，実際は掛け算
   }
   set_segmdesc(gdt + 1, 0xffffffff, 0x00000000,
-              AR_DATA32_RW);  // セグメント番号1番に対する設定
-  set_segmdesc(gdt + 2, 0x0007ffff, 0x00280000,
-              AR_CODE32_ER);  // セグメント番号2番に対する設定（bootpack.hrb用）
+               AR_DATA32_RW);  // セグメント番号1番に対する設定
+  set_segmdesc(
+      gdt + 2, 0x0007ffff, 0x00280000,
+      AR_CODE32_ER);  // セグメント番号2番に対する設定（bootpack.hrb用）
   load_gdtr(LIMIT_GDT, ADR_GDT);
 
   /* IDTの初期化 */
@@ -31,7 +32,7 @@ void init_gdtidt(void) {
 }
 
 void set_segmdesc(struct SEGMENT_DESCRIPTOR *sd, unsigned int limit, int base,
-                 int ar) {
+                  int ar) {
   if (limit > 0xfffff) {
     ar |= 0x8000; /* G_bit = 1*/
     limit /= 0x1000;
