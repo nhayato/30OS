@@ -89,6 +89,7 @@ srcimg:
 	$(RM) *.hrb
 	$(RM) *.sys
 	$(RM) *.lst
+	$(RM) *.map
 	$(RM) hankaku.c
 	$(RM) convHankakuTxt
 	$(RM) *.o
