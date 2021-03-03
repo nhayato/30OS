@@ -159,10 +159,10 @@ docker-build: Dockerfile
 
 .PHONY: docker-make
 docker-make:
+	make docker-build
 	docker run -it --rm -v $(CURDIR):/${OSNAME} -w /${OSNAME} ${OSBUILDER} make img
 
 .PHONY: docker-run
 docker-run:
-	make docker-build
 	make docker-make
 	qemu-system-i386 -m 32m -enable-kvm -drive file=${OSIMAGE},format=raw,if=floppy
