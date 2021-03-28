@@ -308,15 +308,31 @@ void sheet_refreshmap(struct SHTCTL *ctl, int vx0, int vy0, int vx1, int vy1,
     {
       by1 = sht->bysize;
     }
-    for (by = by0; by < by1; by++)
+
+    if (sht->col_inv == -1) // 透明色なし専用の高速版
     {
-      vy = sht->vy0 + by;
-      for (bx = bx0; bx < bx1; bx++)
+      for (by = by0; by < by1; by++)
       {
-        vx = sht->vx0 + bx;
-        if (buf[by * sht->bxsize + bx] != sht->col_inv)
+        vy = sht->vy0 + by;
+        for (bx = bx0; bx < bx1; bx++)
         {
+          vx = sht->vx0 + bx;
           map[vy * ctl->xsize + vx] = sid;
+        }
+      }
+    }
+    else // 透明色ありの一般版
+    {
+      for (by = by0; by < by1; by++)
+      {
+        vy = sht->vy0 + by;
+        for (bx = bx0; bx < bx1; bx++)
+        {
+          vx = sht->vx0 + bx;
+          if (buf[by * sht->bxsize + bx] != sht->col_inv)
+          {
+            map[vy * ctl->xsize + vx] = sid;
+          }
         }
       }
     }
